@@ -1,15 +1,5 @@
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  ReferenceLine,
-} from "recharts"
+import { XAxis, YAxis, CartesianGrid, ResponsiveContainer, AreaChart, Area, ReferenceLine } from "recharts"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
 import { ChartDataPoint } from "@/interfaces/dashboard.interface"
 export const AreaChartTemperature = ({ chartData, yDomain, avgTemp }: { chartData: ChartDataPoint[], yDomain: [number, number], avgTemp: number }) => {
@@ -31,6 +21,12 @@ export const AreaChartTemperature = ({ chartData, yDomain, avgTemp }: { chartDat
             >
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData}>
+                  <defs>
+                    <linearGradient id="temperatureArea" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--chart-2))" stopOpacity={0.8} />
+                      <stop offset="100%" stopColor="hsl(var(--chart-2))" stopOpacity={0.1} />
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="time" fontSize={12} tickLine={false} axisLine={false} />
                   <YAxis
@@ -56,8 +52,7 @@ export const AreaChartTemperature = ({ chartData, yDomain, avgTemp }: { chartDat
                     type="monotone"
                     dataKey="temperature"
                     stroke="hsl(var(--chart-2))"
-                    fill="hsl(var(--chart-2))"
-                    fillOpacity={0.4}
+                    fill="url(#temperatureArea)"
                     strokeWidth={2}
                   />
                 </AreaChart>

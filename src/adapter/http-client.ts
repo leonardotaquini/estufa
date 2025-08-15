@@ -17,7 +17,7 @@ class HttpClient {
         }
     };
 
-    async post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+    async post<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
         try {
             return await this.instance.post<T>(url, data, config);
 
@@ -27,7 +27,7 @@ class HttpClient {
         }
     };
 
-    async patch<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+    async patch<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
         try {
             return await this.instance.patch<T>(url, data, config);
         }
@@ -55,4 +55,5 @@ class HttpClient {
 
 }
 
-export default new HttpClient();
+const httpClient = new HttpClient()
+export default httpClient
