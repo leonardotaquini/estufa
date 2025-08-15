@@ -25,17 +25,17 @@ export const LineChartTemperature = ({ chartData, yDomain, avgTemp }: {chartData
               config={{
                 temperature: {
                   label: "Temperatura",
-                  color: "hsl(var(--chart-1))",
+                  color: "var(--chart-4)",
                 },
               }}
-              className="h-[300px]"
+              className="h-[300px] max-w-full"
             >
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer>
                 <LineChart data={chartData}>
                   <defs>
                     <linearGradient id="temperatureLine" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(var(--chart-1))" stopOpacity={1} />
-                      <stop offset="100%" stopColor="hsl(var(--chart-1))" stopOpacity={0.2} />
+                      <stop offset="0%" stopColor="var(--chart-4)" stopOpacity={1} />
+                      <stop offset="100%" stopColor="var(--chart-4)" stopOpacity={0.2} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -64,8 +64,8 @@ export const LineChartTemperature = ({ chartData, yDomain, avgTemp }: {chartData
                     dataKey="temperature"
                     stroke="url(#temperatureLine)"
                     strokeWidth={3}
-                    dot={{ r: 4, strokeWidth: 2, fill: "hsl(var(--chart-1))" }}
-                    activeDot={{ r: 6, stroke: "hsl(var(--chart-1))", strokeWidth: 2 }}
+                    dot={{ r: 4, strokeWidth: 2, fill: "var(--chart-4)" }}
+                    activeDot={{ r: 6, stroke: "var(--chart-4)", strokeWidth: 2 }}
                     strokeLinecap="round"
                   />
                 </LineChart>

@@ -14,17 +14,17 @@ export const AreaChartTemperature = ({ chartData, yDomain, avgTemp }: { chartDat
               config={{
                 temperature: {
                   label: "Temperatura",
-                  color: "hsl(var(--chart-2))",
+                  color: "var(--chart-4)",
                 },
               }}
-              className="h-[300px]"
+              className="h-[300px] max-w-full"
             >
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData}>
                   <defs>
                     <linearGradient id="temperatureArea" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(var(--chart-2))" stopOpacity={0.8} />
-                      <stop offset="100%" stopColor="hsl(var(--chart-2))" stopOpacity={0.1} />
+                      <stop offset="0%" stopColor="var(--chart-4)" stopOpacity={0.8} />
+                      <stop offset="100%" stopColor="var(--chart-4)" stopOpacity={0.1} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -51,7 +51,7 @@ export const AreaChartTemperature = ({ chartData, yDomain, avgTemp }: { chartDat
                   <Area
                     type="monotone"
                     dataKey="temperature"
-                    stroke="hsl(var(--chart-2))"
+                    stroke="var(--chart-4)"
                     fill="url(#temperatureArea)"
                     strokeWidth={2}
                   />

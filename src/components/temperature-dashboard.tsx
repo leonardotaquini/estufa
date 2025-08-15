@@ -11,13 +11,14 @@ import { fetchTemperatureData } from "@/app/actions"
 import { LineChartTemperature } from "./line-chart-temperature"
 import { AreaChartTemperature } from "./area-chart-temperature"
 import { TemperatureTable } from "./temperature-table"
+import { ModeToggle } from "./modde-toggle"
 
 export function TemperatureDashboard() {
   const [data, setData] = useState<TemperatureData | null>(null)
   const [loading, setLoading] = useState(true)
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [results, setResults] = useState(50)
+  const [results, setResults] = useState(20)
 
   const fetchData = useCallback(async (qty?: number) => {
     try {
@@ -100,16 +101,18 @@ export function TemperatureDashboard() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 ">
+
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex gap-4 py-3 justify-between flex-col">
+          <ModeToggle className="self-end" />
+        <div className="flex flex-col justify-center items-center gap-4">
           <h1 className="text-3xl font-bold">Monitor de Temperatura</h1>
           <p className="text-muted-foreground">
             {data?.channel.name} - Canal #{data?.channel.id}
           </p>
         </div>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-4 sm:space-y-0">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-4 sm:space-y-0 self-center">
           {lastUpdate && (
             <div className="flex items-center space-x-2 text-sm text-muted-foreground">
               <Clock className="h-4 w-4" />
