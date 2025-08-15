@@ -1,30 +1,28 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 
 import { Thermometer, RefreshCw, Clock, TrendingUp, TrendingDown, Minus } from "lucide-react"
 import { ChartDataPoint, TemperatureData } from "@/interfaces/dashboard.interface"
-import { getDataService } from "@/services/getData.service"
+import { fetchTemperatureData } from "@/app/actions"
 import { LineChartTemperature } from "./line-chart-temperature"
 import { AreaChartTemperature } from "./area-chart-temperature"
+import { TemperatureTable } from "./temperature-table"
 
 export function TemperatureDashboard() {
   const [data, setData] = useState<TemperatureData | null>(null)
   const [loading, setLoading] = useState(true)
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [results, setResults] = useState(50)
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async (qty?: number) => {
     try {
       setError(null)
-      const response = await getDataService()
-      if (response.status !== 200) {
-        throw new Error("Error al obtener los datos")
-      }
-      const result: TemperatureData = response.data
+      const result = await fetchTemperatureData(qty ?? results)
       setData(result)
       setLastUpdate(new Date())
     } catch (err) {
@@ -32,15 +30,15 @@ export function TemperatureDashboard() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [results])
 
   useEffect(() => {
     // Cargar datos inicialmente
-    fetchData()
+    fetchData(results)
     // Actualización automática cada 3 minutos
-    const interval = setInterval(fetchData, 3 * 60 * 1000)
+    const interval = setInterval(() => fetchData(results), 3 * 60 * 1000)
     return () => clearInterval(interval)
-  }, [])
+  }, [fetchData, results])
 
   const chartData: ChartDataPoint[] =
     data?.feeds.map((feed) => ({
@@ -111,17 +109,32 @@ export function TemperatureDashboard() {
             {data?.channel.name} - Canal #{data?.channel.id}
           </p>
         </div>
-        <div className="flex items-center space-x-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-4 sm:space-y-0">
           {lastUpdate && (
             <div className="flex items-center space-x-2 text-sm text-muted-foreground">
               <Clock className="h-4 w-4" />
               <span>Última actualización: {lastUpdate.toLocaleTimeString("es-ES")}</span>
             </div>
           )}
-          <Button onClick={fetchData} disabled={loading} variant="outline" size="sm">
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
-            Actualizar
-          </Button>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              fetchData(results)
+            }}
+            className="flex items-center space-x-2"
+          >
+            <Input
+              type="number"
+              min={1}
+              value={results}
+              onChange={(e) => setResults(Number(e.target.value))}
+              className="w-24"
+            />
+            <Button type="submit" size="sm" variant="outline" disabled={loading}>
+              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+              Actualizar
+            </Button>
+          </form>
         </div>
       </div>
 
@@ -205,23 +218,7 @@ export function TemperatureDashboard() {
           <CardDescription>Últimas {data?.feeds.length || 0} lecturas del sensor</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
-            {chartData
-              .slice()
-              .reverse()
-              .map((point, index) => (
-                <div key={index} className="flex items-center justify-between p-3 rounded-lg border">
-                  <div className="flex items-center space-x-3">
-                    <Badge variant="outline">{point.time}</Badge>
-                    <span className="text-sm text-muted-foreground">{point.fullTime}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Thermometer className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium">{point.temperature.toFixed(2)}°C</span>
-                  </div>
-                </div>
-              ))}
-          </div>
+          <TemperatureTable data={chartData} />
         </CardContent>
       </Card>
     </div>

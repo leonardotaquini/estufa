@@ -32,6 +32,12 @@ export const LineChartTemperature = ({ chartData, yDomain, avgTemp }: {chartData
             >
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData}>
+                  <defs>
+                    <linearGradient id="temperatureLine" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--chart-1))" stopOpacity={1} />
+                      <stop offset="100%" stopColor="hsl(var(--chart-1))" stopOpacity={0.2} />
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="time" fontSize={12} tickLine={false} axisLine={false} />
                   <YAxis
@@ -56,10 +62,11 @@ export const LineChartTemperature = ({ chartData, yDomain, avgTemp }: {chartData
                   <Line
                     type="monotone"
                     dataKey="temperature"
-                    stroke="hsl(var(--chart-1))"
+                    stroke="url(#temperatureLine)"
                     strokeWidth={3}
-                    dot={{ r: 5, strokeWidth: 2, fill: "hsl(var(--chart-1))" }}
-                    activeDot={{ r: 7, stroke: "hsl(var(--chart-1))", strokeWidth: 2 }}
+                    dot={{ r: 4, strokeWidth: 2, fill: "hsl(var(--chart-1))" }}
+                    activeDot={{ r: 6, stroke: "hsl(var(--chart-1))", strokeWidth: 2 }}
+                    strokeLinecap="round"
                   />
                 </LineChart>
               </ResponsiveContainer>
