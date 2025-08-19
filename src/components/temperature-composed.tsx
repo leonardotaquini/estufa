@@ -17,23 +17,33 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/
 import { ChartContainer } from "./ui/chart";
 
 export type ComposedPoint = {
-    time: string;              // eje X (ej: "10:25")
-    fullTime: string;          // para tooltip
-    temperature: number;       // dato crudo
+    time: string;               // eje X (ej: "10:25")
+    fullTime: string;           // para tooltip
+    temperature: number;        // dato crudo
     smoothTemp?: number | null; // media móvil
 };
+
+
+interface TemperatureComposedProps {
+    data: ComposedPoint[];
+    yDomain?: [number, number];
+    showLegend?: boolean;
+    avgTemp: number;
+}
+
+import type { TooltipProps } from "recharts";
+import type {
+    ValueType,
+    NameType,
+    Payload,
+} from "recharts/types/component/DefaultTooltipContent";
 
 export function TemperatureComposed({
     data,
     yDomain,
     showLegend = true,
-    avgTemp
-}: {
-    data: ComposedPoint[];
-    yDomain?: [number, number];
-    showLegend?: boolean;
-    avgTemp: number
-}) {
+    avgTemp,
+}: TemperatureComposedProps) {
     const domain: [number, number] =
         yDomain ??
         (() => {
@@ -50,6 +60,35 @@ export function TemperatureComposed({
             return [min - pad, max + pad];
         })();
 
+
+    const tooltipFormatter: TooltipProps<ValueType, NameType>["formatter"] = (
+        value,
+        _name,
+        payloadItem
+    ) => {
+        // payloadItem trae info de la serie activa
+        const p = payloadItem as Payload<ValueType, NameType> | undefined;
+        const key = (p?.dataKey as string) ?? String(_name); // "temperature" | "smoothTemp"
+
+        const label =
+            key === "temperature"
+                ? "Temperatura"
+                : key === "smoothTemp"
+                    ? "Media móvil"
+                    : String(_name);
+
+        return [typeof value === "number" ? `${value.toFixed(2)}°C` : String(value), label];
+    };
+
+    const tooltipLabelFormatter: TooltipProps<ValueType, NameType>["labelFormatter"] = (
+        label,
+        payload
+    ) => {
+        const arr = payload as Payload<ValueType, NameType>[] | undefined;
+        const first = Array.isArray(arr) ? arr[0] : undefined;
+        const fullTime = (first?.payload as { fullTime?: string } | undefined)?.fullTime;
+        return fullTime ?? `Hora: ${String(label)}`;
+    };
     return (
         <Card>
             <CardHeader>
@@ -66,7 +105,7 @@ export function TemperatureComposed({
                     }}
                     className="h-[300px] w-full"
                 >
-                    <ResponsiveContainer >
+                    <ResponsiveContainer>
                         <ComposedChart data={data} margin={{ top: 12, right: 16, bottom: 8, left: 8 }}>
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="time" tickLine={false} axisLine={false} />
@@ -74,21 +113,22 @@ export function TemperatureComposed({
                                 domain={domain}
                                 tickLine={false}
                                 axisLine={false}
-                                tickFormatter={(v) => `${v.toFixed(1)}°C`}
+                                tickFormatter={(v: number) => `${v.toFixed(1)}°C`}
                             />
                             <Tooltip
-                                formatter={(val: any, key) => [
-                                    typeof val === "number" ? `${val.toFixed(2)}°C` : val,
-                                    key === "temperature" ? "Temperatura" : "Media móvil",
-                                ]}
-                                labelFormatter={(label, payload: any) =>
-                                    payload?.[0]?.payload?.fullTime ? payload[0].payload.fullTime : `Hora: ${label}`
-                                }
+                                formatter={tooltipFormatter}
+                                labelFormatter={tooltipLabelFormatter}
                             />
                             {showLegend && <Legend />}
 
+                            {/* Línea de referencia del promedio */}
+                            <ReferenceLine
+                                y={avgTemp}
+                                strokeDasharray="4 4"
+                                stroke="currentColor"
+                                ifOverflow="extendDomain"
+                            />
 
-                            <ReferenceLine y={avgTemp} strokeDasharray="4 4" stroke="currentColor" ifOverflow="extendDomain" />
                             {/* Área = datos crudos */}
                             <Area
                                 type="monotone"
