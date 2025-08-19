@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-
+import { movingAverage } from "@/utils/movingAverage"
 import { Thermometer, RefreshCw, Clock, TrendingUp, TrendingDown, Minus } from "lucide-react"
 import { ChartDataPoint, TemperatureData } from "@/interfaces/dashboard.interface"
 import { fetchTemperatureData } from "@/app/actions"
@@ -12,13 +12,14 @@ import { LineChartTemperature } from "./line-chart-temperature"
 import { AreaChartTemperature } from "./area-chart-temperature"
 import { TemperatureTable } from "./temperature-table"
 import { ModeToggle } from "./modde-toggle"
+import { TemperatureComposed } from "./temperature-composed"
 
 export function TemperatureDashboard() {
   const [data, setData] = useState<TemperatureData | null>(null)
   const [loading, setLoading] = useState(true)
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [results, setResults] = useState(20)
+  const [results, setResults] = useState(150)
 
   const fetchData = useCallback(async (qty?: number) => {
     try {
@@ -41,15 +42,21 @@ export function TemperatureDashboard() {
     return () => clearInterval(interval)
   }, [fetchData, results])
 
-  const chartData: ChartDataPoint[] =
+  const chartDataRaw: ChartDataPoint[] =
     data?.feeds.map((feed) => ({
-      time: new Date(feed.created_at).toLocaleTimeString("es-ES", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
+      time: new Date(feed.created_at).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }),
       temperature: Number.parseFloat(feed.field1),
       fullTime: new Date(feed.created_at).toLocaleString("es-ES"),
-    })) || []
+    })) || [];
+
+  const maValues = movingAverage(chartDataRaw.map(p => p.temperature), 5);
+
+
+  const chartData: ChartDataPoint[] = chartDataRaw.map((p, i) => ({
+    ...p,
+    smoothTemp: maValues[i],
+  }));
+
 
   const currentTemp = data?.feeds[data.feeds.length - 1]?.field1
   const previousTemp = data?.feeds[data.feeds.length - 2]?.field1
@@ -105,7 +112,7 @@ export function TemperatureDashboard() {
 
       {/* Header */}
       <div className="flex gap-4 py-3 justify-between flex-col">
-          <ModeToggle className="self-end" />
+        <ModeToggle className="self-end" />
         <div className="flex flex-col justify-center items-center gap-4">
           <h1 className="text-3xl font-bold">Monitor de Temperatura</h1>
           <p className="text-muted-foreground">
@@ -206,11 +213,13 @@ export function TemperatureDashboard() {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
+      <div >
+        {/* 
         <LineChartTemperature chartData={chartData} yDomain={yDomain} avgTemp={avgTemp} />
 
-        <AreaChartTemperature chartData={chartData} yDomain={yDomain} avgTemp={avgTemp} />
+        <AreaChartTemperature chartData={chartData} yDomain={yDomain} avgTemp={avgTemp} /> */}
+
+        <TemperatureComposed data={chartData} yDomain={yDomain} avgTemp={avgTemp} />
 
       </div>
 

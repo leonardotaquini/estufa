@@ -24,4 +24,5 @@ export interface ChartDataPoint {
   time: string
   temperature: number
   fullTime: string
+  smoothTemp?: number | null; 
 }
