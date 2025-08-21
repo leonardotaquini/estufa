@@ -1,7 +1,5 @@
-export function movingAverage(
-  data: number[],
-  window: number
-): (number | null)[] {
+export function movingAverage(data: number[], window: number): (number | null)[] {
+  
   if (window <= 1) return data;
 
   const result: (number | null)[] = Array(data.length).fill(null);

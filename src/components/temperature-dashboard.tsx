@@ -19,6 +19,7 @@ export function TemperatureDashboard() {
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [results, setResults] = useState(150)
+  const [avgMaWindow, setAvgMaWindow] = useState(5)
 
   const fetchData = useCallback(async (qty?: number) => {
     try {
@@ -39,7 +40,7 @@ export function TemperatureDashboard() {
     // Actualización automática cada 3 minutos
     const interval = setInterval(() => fetchData(results), 3 * 60 * 1000)
     return () => clearInterval(interval)
-  }, [fetchData, results])
+  }, [fetchData, results, avgMaWindow])
 
   const chartDataRaw: ChartDataPoint[] =
     data?.feeds.map((feed) => ({
@@ -48,14 +49,13 @@ export function TemperatureDashboard() {
       fullTime: new Date(feed.created_at).toLocaleString("es-ES"),
     })) || [];
 
-  const maValues = movingAverage(chartDataRaw.map(p => p.temperature), 5);
+  const maValues = movingAverage(chartDataRaw.map(p => p.temperature), avgMaWindow);
 
 
   const chartData: ChartDataPoint[] = chartDataRaw.map((p, i) => ({
     ...p,
     smoothTemp: maValues[i],
   }));
-
 
   const currentTemp = data?.feeds[data.feeds.length - 1]?.field1
   const previousTemp = data?.feeds[data.feeds.length - 2]?.field1
@@ -144,6 +144,25 @@ export function TemperatureDashboard() {
               Actualizar
             </Button>
           </form>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+            }}
+            className="flex items-center space-x-2"
+          >
+            <Input
+              type="number"
+              min={1}
+              value={avgMaWindow}
+              onChange={(e) => setAvgMaWindow(Number(e.target.value))}
+              className="w-24"
+            />
+            <Button type="submit" size="sm" variant="outline" disabled={loading}>
+              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+              Cambiar Media Móvil
+            </Button>
+          </form>
+
         </div>
       </div>
 
@@ -212,10 +231,10 @@ export function TemperatureDashboard() {
       </div>
 
       {/* Charts */}
-      <div >
+      <div className="space-y-4">
 
+        <TemperatureComposed data={chartData} yDomain={[20, 60]} avgTemp={avgTemp} />
         <TemperatureComposed data={chartData} yDomain={yDomain} avgTemp={avgTemp} />
-
       </div>
 
       {/* Data Table */}

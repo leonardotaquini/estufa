@@ -47,7 +47,7 @@ export function TemperatureComposed({
     const domain: [number, number] =
         yDomain ??
         (() => {
-            if (!data.length) return [0, 60];
+            if (!data.length) return [20, 60];
             const vals = data.map((d) => d.temperature);
             let min = Math.min(...vals);
             let max = Math.max(...vals);
