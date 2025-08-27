@@ -1,0 +1,9 @@
+services:
+  estufa-frontend:
+    build: .
+    container_name: estufa-frontend
+    ports:
+      - "4010:3000"
+    restart: always
+    env_file:
+      - .env
